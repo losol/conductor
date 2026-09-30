@@ -1,11 +1,11 @@
 # Dockerfile for Conductor (Webhook Gateway & Message Router)
 #
-# Build from monorepo root:
-#   docker build -f apps/conductor/Dockerfile -t conductor:latest .
+# Build:
+#   docker build -t conductor:latest .
 #
 # Run with configuration:
-#   docker run -v /path/to/config:/data/config -p 3000:3000 conductor:latest
-#
+#   docker run -v /path/to/config:/data/config -p 3333:3333 conductor:latest
+
 ##################
 # Stage 1: Base  #
 ##################
@@ -14,91 +14,68 @@ FROM node:24-bookworm-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
-# Install security updates and clean up
+# wget is needed by the HEALTHCHECK below; the slim image does not carry it.
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
     ca-certificates \
+    wget \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && corepack enable \
-    && corepack prepare pnpm@10.28.2 --activate \
+    && corepack prepare pnpm@11.8.0 --activate \
     && pnpm config set store-dir /pnpm/store
 
-##################
-# Stage 2: Prune #
-##################
-FROM base AS pruner
-
 WORKDIR /app
 
-# Install turbo globally for pruning
-RUN pnpm add -g turbo
-
-# Copy entire monorepo for pruning
-COPY . .
-
-# Prune the workspace to only include Conductor and its dependencies
-RUN pnpm turbo prune @eventuras/conductor --docker
-
-##################
-# Stage 3: Build #
-##################
+###########################
+# Stage 2: Build          #
+###########################
 FROM base AS builder
 
-WORKDIR /app
-
-# Copy pruned lockfile and package.json files
-COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY --from=pruner /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
-
-# Install dependencies for pruned workspace
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
-# Copy pruned source files
-COPY --from=pruner /app/out/full/ .
-
-# Build workspace dependencies first (logger must be built before conductor)
-RUN pnpm --filter @eventuras/logger run build
-
-# Build Conductor
-WORKDIR /app/apps/conductor
+COPY tsconfig.json vite.config.ts ./
+COPY src ./src
 RUN pnpm run build
+
+###########################
+# Stage 3: Runtime deps   #
+###########################
+# A separate install rather than pruning the builder's tree: the build output
+# externalizes every dependency, so the runtime needs exactly the production set.
+FROM base AS prod-deps
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --prod --frozen-lockfile
 
 ##########################
 # Stage 4: Production    #
 ##########################
 FROM base AS production
 
-# Create non-root user for security
 RUN groupadd -r conductor && useradd -r -g conductor conductor
 
-WORKDIR /app
+COPY --from=prod-deps --chown=conductor:conductor --chmod=555 /app/node_modules ./node_modules
+COPY --from=builder --chown=conductor:conductor --chmod=555 /app/dist ./dist
+COPY --chown=conductor:conductor --chmod=444 package.json ./package.json
 
-# Copy built application and production dependencies
-COPY --from=builder --chown=conductor:conductor --chmod=555 /app/apps/conductor/dist ./dist
-COPY --from=builder --chown=conductor:conductor --chmod=555 /app/apps/conductor/package.json ./package.json
+# The app resolves its config as `process.cwd()/data/config` — see
+# src/config/initializer.ts — so the directory must exist under /app and be
+# writable by the runtime user. docker-compose mounts a volume over it; without
+# one, the container initializes its own config files here on first start.
+RUN mkdir -p /app/data/config && chown -R conductor:conductor /app/data/config
 
-# Copy node_modules (contains production dependencies)
-COPY --from=builder --chown=conductor:conductor --chmod=555 /app/node_modules ./node_modules
-
-# Create config directory with proper permissions
-RUN mkdir -p /data/config && chown -R conductor:conductor /data/config
-
-# Switch to non-root user
 USER conductor
 
-# Set environment variables
 ENV NODE_ENV=production \
-    PORT=3333 \
-    CONFIG_DIR=/data/config
+    PORT=3333
 
-# Expose application port
 EXPOSE 3333
 
-# Health check using wget (available in alpine)
+# `/` is the endpoint the auth middleware exempts and calls the health check;
+# /health is behind auth and does not exist, so probing it always returned 401.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3333/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3333/ || exit 1
 
-# Start the application
 CMD ["node", "dist/index.js"]

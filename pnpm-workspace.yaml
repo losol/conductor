@@ -1,0 +1,18 @@
+# Settings only — Conductor is a single package, not a workspace.
+
+# Allow-list of packages whose install scripts may run. With pnpm 11's
+# `strictDepBuilds` default, anything else with a script fails the install
+# rather than being skipped in silence.
+allowBuilds:
+  esbuild: true
+
+# Supply-chain protection: do not resolve packages published less than 10 days
+# ago, mirroring the Dependabot cooldown so local installs and Dependabot apply
+# the same window. Soft mode warns instead of prompting, which would otherwise
+# fail any install run with --no-save.
+minimumReleaseAge: 14400
+minimumReleaseAgeStrict: false
+
+minimumReleaseAgeExclude:
+  # Own packages: a freshly published @eventuras/* installs without the delay.
+  - '@eventuras/*'
