@@ -1,4 +1,8 @@
-# Settings only — Conductor is a single package, not a workspace.
+packages:
+  - apps/*
+  - libs/*
+  - '!**/dist'
+  - '!**/node_modules'
 
 # Allow-list of packages whose install scripts may run. With pnpm 11's
 # `strictDepBuilds` default, anything else with a script fails the install

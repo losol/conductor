@@ -1,0 +1,14 @@
+# The build context is the repository root: the pruner stage in
+# apps/conductor/Dockerfile copies the whole tree before `turbo prune` cuts it
+# down, so keep everything the build does not need out of the context.
+**/node_modules
+**/dist
+**/.turbo
+**/data/config
+**/.env
+**/.env.*
+*.log
+.git
+.github
+docs
+docker-compose.yml

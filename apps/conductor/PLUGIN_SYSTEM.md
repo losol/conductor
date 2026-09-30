@@ -214,11 +214,13 @@ The application performs comprehensive validation on startup:
 ```yaml
 services:
   conductor:
-    build: .
+    build:
+      context: .                            # repository root: turbo prune needs the whole monorepo
+      dockerfile: apps/conductor/Dockerfile
     ports:
       - "3333:3333"
     volumes:
-      - ./data/config:/app/data/config  # Persistent config storage
+      - ./apps/conductor/data/config:/app/data/config  # Persistent config storage
     environment:
       - PORT=3333
       - NODE_ENV=production
