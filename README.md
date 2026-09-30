@@ -5,17 +5,18 @@ routes notifications from Homey, Home Assistant or any HTTP client to Discord,
 with more channels planned.
 
 The repository is a [Turborepo](https://turborepo.com) monorepo managed with
-pnpm. The hub application lives in `apps/`, and the standalone adapter libraries
-described in [ADR 0001](docs/adr/0001-directional-adapter-architecture.md) will
-live in `libs/`.
+pnpm. The hub application lives in `apps/`, and the standalone adapter packages
+described in [ADR 0001](docs/adr/0001-directional-adapter-architecture.md) live
+in `packages/`.
 
 ## Layout
 
-| Path             | Package                 | Contents                                                                                                 |
-| ---------------- | ----------------------- | -------------------------------------------------------------------------------------------------------- |
-| `apps/conductor` | `@eventuras/conductor`  | The hub: HTTP API, tenant authentication, plugin registry. See its [README](apps/conductor/README.md).   |
-| `libs/`          | `@eventuras/conductor-*` | Adapter libraries (`conductor-core`, `conductor-discord`, `conductor-mqtt`). Empty until ADR 0001 phase 1. |
-| `docs/adr`       |                         | Architecture decision records.                                                                            |
+| Path                      | Package                     | Contents                                                                                                                                              |
+| ------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/conductor`          | `@eventuras/conductor`      | The hub: HTTP API, tenant authentication, plugin registry. See its [README](apps/conductor/README.md).                                                |
+| `packages/conductor-core` | `@eventuras/conductor-core` | Shared contracts for adapters: sender and receiver interfaces, descriptors, logger shape, errors. See its [README](packages/conductor-core/README.md). |
+| `packages/`               | `@eventuras/conductor-*`    | Adapter packages to come: `conductor-discord`, `conductor-mqtt` (ADR 0001 phases 2 and 3).                                                            |
+| `docs/adr`                |                             | Architecture decision records.                                                                                                                        |
 
 ## Getting started
 
