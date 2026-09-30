@@ -70,4 +70,4 @@ release image. See `.github/workflows/docker.yml`.
 
 ## License
 
-GPL-3.0-or-later
+MPL-2.0

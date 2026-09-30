@@ -3,7 +3,7 @@
   "version": "0.1.4",
   "private": true,
   "description": "Messaging orchestration server",
-  "license": "GPL-3.0-or-later",
+  "license": "MPL-2.0",
   "author": "Losen",
   "type": "module",
   "repository": {
