@@ -1,0 +1,46 @@
+{
+  "name": "@eventuras/conductor-core",
+  "version": "0.0.0",
+  "description": "Shared contracts for Conductor adapters: senders, receivers, config descriptors and the logger they write to",
+  "license": "MPL-2.0",
+  "author": "Losen",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/losol/conductor.git",
+    "directory": "packages/conductor-core"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "peerDependencies": {
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@eventuras/typescript-config": "^1.1.0",
+    "@eventuras/vite-config": "^0.4.0",
+    "typescript": "^6.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^4.1.10",
+    "zod": "^4.6.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

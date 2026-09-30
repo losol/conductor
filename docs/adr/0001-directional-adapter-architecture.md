@@ -20,9 +20,9 @@ Some transports (MQTT) are also naturally bidirectional. The current interface o
 ### Package structure
 
 ```
-libs/conductor-core/       @eventuras/conductor-core    — shared interfaces
-libs/conductor-discord/    @eventuras/conductor-discord  — standalone Discord adapter
-libs/conductor-mqtt/       @eventuras/conductor-mqtt     — standalone MQTT adapter
+packages/conductor-core/       @eventuras/conductor-core    — shared interfaces
+packages/conductor-discord/    @eventuras/conductor-discord  — standalone Discord adapter
+packages/conductor-mqtt/       @eventuras/conductor-mqtt     — standalone MQTT adapter
 apps/conductor/            @eventuras/conductor          — hub (optional orchestrator)
 ```
 
@@ -133,15 +133,15 @@ Hub explicitly imports and registers adapter factories at startup. No dynamic di
 
 ## Implementation Plan
 
-### Phase 1: `libs/conductor-core`
+### Phase 1: `packages/conductor-core`
 
 Shared types: `ConductorSender`, `ConductorReceiver`, `ConductorHub`, `SendMessage`, `SendResponse`, `ConductorLogger`, `SenderConfigDescriptor`, error classes.
 
-### Phase 2: `libs/conductor-discord`
+### Phase 2: `packages/conductor-discord`
 
 Port `src/plugins/discord/` to standalone `DiscordSender` with `createDiscordSender({ config, logger? })`.
 
-### Phase 3: `libs/conductor-mqtt`
+### Phase 3: `packages/conductor-mqtt`
 
 New `MqttSender` with `createMqttSender({ config, logger? })`. `targetId` maps to MQTT topic.
 

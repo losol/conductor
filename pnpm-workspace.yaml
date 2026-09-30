@@ -1,6 +1,6 @@
 packages:
   - apps/*
-  - libs/*
+  - packages/*
   - '!**/dist'
   - '!**/node_modules'
 
@@ -8,6 +8,7 @@ packages:
 # `strictDepBuilds` default, anything else with a script fails the install
 # rather than being skipped in silence.
 allowBuilds:
+  '@swc/core': true
   esbuild: true
 
 # Supply-chain protection: do not resolve packages published less than 10 days
