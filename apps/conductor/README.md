@@ -601,4 +601,4 @@ interface PluginContext {
 
 ## License
 
-GPL-3.0-or-later
+MPL-2.0
