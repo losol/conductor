@@ -65,8 +65,24 @@ pnpm changeset            # record a change
 pnpm changeset:version    # apply pending changesets and bump versions
 ```
 
-Pushing a `v*` tag promotes the canary image built from `main` to a versioned
-release image. See `.github/workflows/docker.yml`.
+On every push to `main`, `.github/workflows/release.yml` opens or updates a
+"chore: version packages" pull request from the pending changesets. Merging it
+publishes the public packages in `packages/` to npm with trusted publishing
+(OIDC) and provenance, and tags each published version.
+
+The hub is private and is not published to npm. Pushing a `v*` tag promotes
+the canary image built from `main` to a versioned release image. See
+`.github/workflows/docker.yml`.
+
+## Dependency updates
+
+Dependabot (`.github/dependabot.yml`) updates npm packages and the Docker base
+image weekly, and GitHub Actions monthly. It waits 10 days after a release
+before proposing it, the same window `minimumReleaseAge` in
+`pnpm-workspace.yaml` applies to local installs. First-party `@eventuras/*`
+packages are exempt. Dependabot PRs carry no changeset, so
+`.github/workflows/dependabot-changeset.yml` adds one when a published
+package's runtime or peer dependencies change.
 
 ## License
 

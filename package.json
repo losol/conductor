@@ -19,6 +19,7 @@
     "changeset": "changeset",
     "changeset:version": "changeset version",
     "changeset:tag": "changeset git-tag",
+    "release": "pnpm build && changeset publish",
     "clean": "pnpm -r exec rm -rf dist .turbo node_modules && rm -rf node_modules .turbo"
   },
   "devDependencies": {
