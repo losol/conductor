@@ -10,7 +10,10 @@
 ##################
 # Stage 1: Base  #
 ##################
-FROM node:24-bookworm-slim AS base
+# Pinned by digest for reproducible builds; Dependabot bumps the digest when
+# the tag is rebuilt (see .github/dependabot.yml). The digest is the multi-arch
+# index, so the amd64 and arm64 builds both resolve from it.
+FROM node:24-bookworm-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54 AS base
 
 ENV PNPM_HOME="/pnpm"
 # pnpm 11 puts global binaries in $PNPM_HOME/bin; the pruner stage installs turbo there.

@@ -10,6 +10,10 @@ concurrency:
   group: conductor-${{ github.ref }}
   cancel-in-progress: true
 
+# Called workflows inherit these; none of them writes to the repository.
+permissions:
+  contents: read
+
 jobs:
   ci:
     name: CI

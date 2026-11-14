@@ -1,0 +1,58 @@
+name: Dependabot changeset
+
+# Dependabot PRs carry no changeset, so a bump to a published package's
+# dependencies would be merged but never released. This commits a patch
+# changeset for every public package whose dependencies, optionalDependencies
+# or peerDependencies changed; see scripts/dependabot-changeset.mjs.
+#
+# The commit is pushed with GITHUB_TOKEN, which by design does not trigger CI
+# again. The CI run on Dependabot's own commit still covers the code — the
+# changeset is only a markdown file.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/*/package.json'
+
+concurrency:
+  group: dependabot-changeset-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  changeset:
+    name: Add changeset
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    # Workflows on Dependabot PRs get a read-only token unless raised here.
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Write changesets
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: node scripts/dependabot-changeset.mjs
+
+      - name: Commit and push
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [ -z "$(git status --porcelain -- .changeset)" ]; then
+            echo "Changesets already up to date."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A .changeset
+          git commit -m 'chore: add changeset for dependency update'
+          git push origin "HEAD:$HEAD_REF"

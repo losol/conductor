@@ -26,6 +26,9 @@ on:
         description: 'Release tag (e.g., v1.0.0)'
         required: true
 
+permissions:
+  contents: read
+
 env:
   ORGANIZATION_NAME: losolio
   IMAGE_NAME: conductor
