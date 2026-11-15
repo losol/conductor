@@ -1,6 +1,6 @@
 {
   "name": "@eventuras/conductor-core",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Shared contracts for Conductor adapters: senders, receivers, config descriptors and the logger they write to",
   "license": "MPL-2.0",
   "author": "Losen",
