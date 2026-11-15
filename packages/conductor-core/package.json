@@ -35,7 +35,7 @@
   "devDependencies": {
     "@eventuras/typescript-config": "^1.1.0",
     "@eventuras/vite-config": "^0.5.0",
-    "typescript": "^6.0.2",
+    "typescript": "^7.0.2",
     "vite": "^8.3.0",
     "vitest": "^4.1.10",
     "zod": "^4.6.5"
